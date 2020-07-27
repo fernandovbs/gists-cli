@@ -15,7 +15,6 @@ Simple gists cli that allows you to find your gists quickly
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g gists-cli
 $ gists COMMAND
 running command...
 $ gists (-v|--version|version)
@@ -29,7 +28,6 @@ USAGE
 # Commands
 <!-- commands -->
 * [`gists config`](#gists-config)
-* [`gists find [SEARCH]`](#gists-find-search)
 * [`gists help [COMMAND]`](#gists-help-command)
 
 ## `gists config`
@@ -46,27 +44,6 @@ DESCRIPTION
 ```
 
 _See code: [src/commands/config.js](https://github.com/fernandovbs/gists-cli/blob/v0.0.1/src/commands/config.js)_
-
-## `gists find [SEARCH]`
-
-List gists based on a search string
-
-```
-USAGE
-  $ gists find [SEARCH]
-
-OPTIONS
-  -a, --action=action  Action to take for the selected gist.
-
-DESCRIPTION
-  ...
-  Prints or edits gists. Options available are print (DEFAULT) and edit.
-  Ex: 
-  gists find search_string 
-  gists find search_string --action=edit
-```
-
-_See code: [src/commands/find.js](https://github.com/fernandovbs/gists-cli/blob/v0.0.1/src/commands/find.js)_
 
 ## `gists help [COMMAND]`
 
