@@ -1,9 +1,10 @@
-const {Command, flags, args} = require('@oclif/command')
-const {cli} = require('cli-ux')
-const chalk = require('chalk')
-const inquirer = require('inquirer')
+const {Command, flags} = require('@oclif/command')
 const fs = require('fs')
+const {cli} = require('cli-ux')
+const inquirer = require('inquirer')
 const Gists = require('gists')
+const chalk = require('chalk')
+
 const homedir = require('os').homedir()
 
 class FindCommand extends Command {
@@ -20,17 +21,16 @@ class FindCommand extends Command {
     try {
       cli.action.start('Searching gists...')
       
-      const gistsClient = new Gists({ token: this.getToken() });
+      const gistsClient = new Gists({ token: this.getToken() })
+
       const {pages} = await gistsClient.all()
       const [gistsResponseBody] = pages
-      const {body:gists} = gistsResponseBody
+      const {body: gists} = gistsResponseBody
 
       const {search = ''} = args
       const {action = 'print'} = flags
   
-      const options = gists.filter(gist => this.gistIncludes(gist, search)).map(gist => {
-        return {name: gist.description, value: gist.id}
-      })
+      const options = this.getListOptions(gists, search)
 
       cli.action.stop()
 
@@ -61,6 +61,9 @@ class FindCommand extends Command {
           }
         ])
 
+        Object.keys(gist.files).length === 0 &&
+        this.error('This gist do not contain any file!')
+
         const {file} =  Object.keys(gist.files).length > 1 ?
           await inquirer
           .prompt([
@@ -68,9 +71,9 @@ class FindCommand extends Command {
               type: 'list',
               name: 'file',
               message: `What file you want to edit?`,
-              choices: Object.keys(gist.files).map(key => {
-                return {name: gist.files[key].filename, value: gist.files[key]}
-              })
+              choices: Object.keys(gist.files).map(key =>
+                ({name: gist.files[key].filename, value: gist.files[key]})
+              )
             }
           ]) : {file: gist.files[Object.keys(gist.files)[0]]}
 
@@ -80,23 +83,19 @@ class FindCommand extends Command {
           default:`${file.content}`,
           message: 'Edit'
         })
+
         cli.action.start('Updating gist...')
+
         await gistsClient.edit(gistId, { 
           description, 
           files: { ...gist.files, [file.filename]: { ...gist.files[file.filename], content }}
         })
+
         cli.action.stop()
+
         this.log('Done!')
       } else {
-       
-        this.log(chalk`
-{bgWhite.red.bold Description: }{bgWhite.black.bold ${gist.description} }
-{bgWhite.red.bold Files                            }${Object.keys(gist.files).map(key => chalk`
-{bgWhite.red.bold Name: }{bgWhite.black.bold ${gist.files[key].filename || 'Not provided '} }
-{bgWhite.red.bold Content: 
-}{bgWhite.black.bold ${gist.files[key].content}  }
-{bgYellow                                                                      }`).join(' ')}
-        `)
+        this.printGist(gist)
       }
 
       this.exit()                
@@ -114,11 +113,31 @@ class FindCommand extends Command {
     }
   }
   
+  getListOptions (gists, search) {
+    return gists.filter(gist => this.gistIncludes(gist, search)).map(gist => 
+      ({name: gist.description, value: gist.id})
+    )  
+  } 
+
   gistIncludes(gist, search) {
     const files = Object.keys(gist.files)
 
     return (gist.description.includes(search) ||
     files.some(fileName => fileName.includes(search)))
+  }
+
+  printGist(gist) {
+    const filesList = Object.keys(gist.files).map(key => chalk`
+{bgWhite.red.bold Name: }{bgWhite.black.bold ${gist.files[key].filename || 'Not provided '} }
+{bgWhite.red.bold Content: 
+}{bgWhite.black.bold ${gist.files[key].content}  }
+{bgYellow                                                                      }`).join(' ')
+
+    this.log(chalk`
+{bgWhite.red.bold Description: }{bgWhite.black.bold ${gist.description} }
+{bgWhite.red.bold Files:                            }
+    ${filesList}`
+    )    
   }
 }
 

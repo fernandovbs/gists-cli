@@ -1,6 +1,7 @@
-const {Command, flags} = require('@oclif/command')
+const {Command} = require('@oclif/command')
 const inquirer = require('inquirer')
 const fs = require('fs')
+
 const homedir = require('os').homedir()
 
 class ConfigCommand extends Command {
