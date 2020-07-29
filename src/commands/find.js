@@ -32,6 +32,12 @@ class FindCommand extends Command {
   
       const options = this.getListOptions(gists, search)
 
+      if (options.length === 0) {
+        cli.action.stop()
+        this.log(`No gists found. You searched for "${search}"`)
+        this.exit()  
+      } 
+
       cli.action.stop()
 
       const {gistId} = await inquirer
