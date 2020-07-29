@@ -18,10 +18,10 @@ class ConfigCommand extends Command {
     ])
     .then( ({token}) => {
       fs.writeFile(`${homedir}/.gists-cli.json`,`{"token": "${token}"}`, (err) => {
-        if (err) throw err; 
-        this.log(`
-        Done!
-        Run gists find SOMETHING to find your gists`)
+        if (err) {
+          throw err 
+        }
+        this.log(`Done!`)
       })      
     })
     .catch(error => {
