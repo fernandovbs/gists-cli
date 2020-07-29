@@ -25,7 +25,7 @@ class ConfigCommand extends Command {
         this.log(`Done!`)
       })      
     })
-    .catch(error => {
+    .catch(err => {
       if(error.isTtyError) {
         this.error("couldn't be rendered in the current environment")
       } else {

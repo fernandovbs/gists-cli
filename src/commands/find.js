@@ -109,8 +109,8 @@ class FindCommand extends Command {
       }
 
       this.exit()                
-    } catch (e) {
-      this.error(e)
+    } catch (err) {
+      this.error(err)
     }
   }
 
