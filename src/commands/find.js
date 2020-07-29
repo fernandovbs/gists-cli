@@ -8,7 +8,10 @@ const homedir = require('os').homedir()
 
 class FindCommand extends Command {
   static args = [
-    {name: 'search'},
+    {
+      name: 'search',
+      description: 'String to search for. Searchs for description and file names.'
+    },
   ]
     
   async run() {
@@ -48,6 +51,16 @@ class FindCommand extends Command {
       cli.action.stop()
       
       if (action === 'edit') {
+        const {description} = await inquirer
+        .prompt([
+          {
+            type: 'input',
+            name: 'description',
+            message: `New description:`,
+            default: gist.description
+          }
+        ])
+
         const {file} =  Object.keys(gist.files).length > 1 ?
           await inquirer
           .prompt([
@@ -61,15 +74,19 @@ class FindCommand extends Command {
             }
           ]) : {file: gist.files[Object.keys(gist.files)[0]]}
 
-        const editedGist = await inquirer.prompt({
+        const {content} = await inquirer.prompt({
           type: 'editor',
           name: 'content',
           default:`${file.content}`,
           message: 'Edit'
         })
-
-        this.log(editedGist)  
-      
+        cli.action.start('Updating gist...')
+        await gistsClient.edit(gistId, { 
+          description, 
+          files: { ...gist.files, [file.filename]: { ...gist.files[file.filename], content }}
+        })
+        cli.action.stop()
+        this.log('Done!')
       } else {
        
         this.log(chalk`
@@ -82,8 +99,7 @@ class FindCommand extends Command {
         `)
       }
 
-      //const options = { description:'', files: { 'readme.md': { content: fs.readFileSync('README.md', 'utf8') } } };
-                
+      this.exit()                
     } catch (e) {
       this.error(e)
     }
@@ -114,9 +130,7 @@ gists find search_string
 gists find search_string --action=edit
 When --action=edit you will be prompted to choose the file do edit (if more then one found), and the program will attemp to open the default editor 
 `
-FindCommand.args = {
-  search: args.string({char: 'a', description: 'String to search for. Searchs for description and file names.'}),
-}
+
 FindCommand.flags = {
   action: flags.string({char: 'a', description: 'Action to take for the selected gist.'}),
 }
