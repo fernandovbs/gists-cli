@@ -84,16 +84,20 @@ class FindCommand extends Command {
           message: 'Edit'
         })
 
-        cli.action.start('Updating gist...')
+        if (description !== gist.description || content !== file.content) {
+          cli.action.start('Updating gist...')
 
-        await gistsClient.edit(gistId, { 
-          description, 
-          files: { ...gist.files, [file.filename]: { ...gist.files[file.filename], content }}
-        })
+          await gistsClient.edit(gistId, { 
+            description, 
+            files: { ...gist.files, [file.filename]: { ...gist.files[file.filename], content }}
+          })
+  
+          cli.action.stop()  
+          this.log('Done!')
+        } else {
+          this.log('Nothing to update!')
+        }
 
-        cli.action.stop()
-
-        this.log('Done!')
       } else {
         this.printGist(gist)
       }
