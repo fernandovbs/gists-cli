@@ -161,7 +161,13 @@ When --action=edit you will be prompted to choose the file do edit (if more then
 `
 
 FindCommand.flags = {
-  action: flags.string({char: 'a', description: 'Action to take for the selected gist.'}),
+  action: flags.string(
+    {
+      char: 'a', 
+      description: 'Action to take for the selected gist.',
+      options: ['print', 'edit'],
+    }
+  ),
 }
 
 module.exports = FindCommand
