@@ -6,7 +6,6 @@ const homedir = require('os').homedir()
 
 class ConfigCommand extends Command {
   async run() {
-
     inquirer
     .prompt([
       {
@@ -15,21 +14,21 @@ class ConfigCommand extends Command {
         message: `Please, go to https://github.com/settings/tokens/new and generate a Personal access token
         with gists privilege and past it here:
         `,
-      }      
+      },
     ])
-    .then( ({token}) => {
-      fs.writeFile(`${homedir}/.gists-cli.json`,`{"token": "${token}"}`, (err) => {
+    .then(({token}) => {
+      fs.writeFile(`${homedir}/.gists-cli.json`, `{"token": "${token}"}`, err => {
         if (err) {
-          throw err 
+          throw err
         }
-        this.log(`Done!`)
-      })      
+        this.log('Done!')
+      })
     })
-    .catch(err => {
-      if(error.isTtyError) {
+    .catch(error => {
+      if (error.isTtyError) {
         this.error("couldn't be rendered in the current environment")
       } else {
-        this.error("Something whent wrong")
+        this.error('Something whent wrong')
       }
     })
   }

@@ -1,4 +1,4 @@
-const {expect, test} = require('@oclif/test')
+/* const {expect, test} = require('@oclif/test')
 
 describe('find', () => {
   test
@@ -15,3 +15,4 @@ describe('find', () => {
     expect(ctx.stdout).to.contain('hello jeff')
   })
 })
+*/

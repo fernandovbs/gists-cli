@@ -1,17 +1,17 @@
 const {expect, test} = require('@oclif/test')
+const ConfigCommand = require('../../src/commands/config')
+const inquirer = require('inquirer')
+const fs = require('fs')
+const configInst = new ConfigCommand()
 
-describe('config', () => {
+describe('It should print config file content', () => {
   test
+  .stub(inquirer, 'prompt', async () => ({token: 'd4585a0g5aaa19af698fec5ec50eca25352f0d7f'}))
+  .stub(fs, 'writeFile', () => configInst.log('{"token": "d4585a0g5aaa19af698fec5ec50eca25352f0d7f"}'))
   .stdout()
   .command(['config'])
-  .it('runs hello', ctx => {
-    expect(ctx.stdout).to.contain('hello world')
+  .do(ctx => {
+    expect(ctx.stdout).to.contain('{"token": "d4585a0g5aaa19af698fec5ec50eca25352f0d7f"}')
   })
-
-  test
-  .stdout()
-  .command(['config', '--name', 'jeff'])
-  .it('runs hello --name jeff', ctx => {
-    expect(ctx.stdout).to.contain('hello jeff')
-  })
+  .it()
 })

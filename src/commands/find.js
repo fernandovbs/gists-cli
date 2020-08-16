@@ -11,17 +11,17 @@ class FindCommand extends Command {
   static args = [
     {
       name: 'search',
-      description: 'String to search for. Searchs for description and file names.'
+      description: 'String to search for. Searchs for description and file names.',
     },
   ]
-    
+
   async run() {
     const {args, flags} = this.parse(FindCommand)
-    
+
     try {
       cli.action.start('Searching gists...')
-      
-      const gistsClient = new Gists({ token: this.getToken() })
+
+      const gistsClient = new Gists({token: this.getToken()})
 
       const {pages} = await gistsClient.all()
       const [gistsResponseBody] = pages
@@ -29,14 +29,14 @@ class FindCommand extends Command {
 
       const {search = ''} = args
       const {action = 'print'} = flags
-  
+
       const options = this.getListOptions(gists, search)
 
       if (options.length === 0) {
         cli.action.stop()
         this.log(`No gists found. You searched for "${search}"`)
-        this.exit()  
-      } 
+        this.exit()
+      }
 
       cli.action.stop()
 
@@ -46,29 +46,30 @@ class FindCommand extends Command {
           type: 'list',
           name: 'gistId',
           message: `What gist do you want to ${action}?`,
-          choices: options
-        }
+          choices: options,
+        },
       ])
-      
+
       cli.action.start('Getting gist data...')
-      
+
       const {body: gist} = await gistsClient.get(gistId)
-      
+
       cli.action.stop()
-      
+
       if (action === 'edit') {
         const {description} = await inquirer
         .prompt([
           {
             type: 'input',
             name: 'description',
-            message: `New description:`,
-            default: gist.description
-          }
+            message: 'New description:',
+            default: gist.description,
+          },
         ])
 
-        Object.keys(gist.files).length === 0 &&
-        this.error('This gist do not contain any file!')
+        if (Object.keys(gist.files).length === 0) {
+          this.error('This gist do not contain any file!')
+        }
 
         const {file} =  Object.keys(gist.files).length > 1 ?
           await inquirer
@@ -76,58 +77,57 @@ class FindCommand extends Command {
             {
               type: 'list',
               name: 'file',
-              message: `What file you want to edit?`,
+              message: 'What file you want to edit?',
               choices: Object.keys(gist.files).map(key =>
                 ({name: gist.files[key].filename, value: gist.files[key]})
-              )
-            }
+              ),
+            },
           ]) : {file: gist.files[Object.keys(gist.files)[0]]}
 
         const {content} = await inquirer.prompt({
           type: 'editor',
           name: 'content',
-          default:`${file.content}`,
-          message: 'Edit'
+          default: `${file.content}`,
+          message: 'Edit',
         })
 
         if (description !== gist.description || content !== file.content) {
           cli.action.start('Updating gist...')
 
-          await gistsClient.edit(gistId, { 
-            description, 
-            files: { ...gist.files, [file.filename]: { ...gist.files[file.filename], content }}
+          await gistsClient.edit(gistId, {
+            description,
+            files: {...gist.files, [file.filename]: {...gist.files[file.filename], content}},
           })
-  
-          cli.action.stop()  
+
+          cli.action.stop()
           this.log('Done!')
         } else {
           this.log('Nothing to update!')
         }
-
       } else {
         this.printGist(gist)
       }
 
-      this.exit()                
-    } catch (err) {
-      this.error(err)
+      this.exit()
+    } catch (error) {
+      this.error(error)
     }
   }
 
   getToken() {
     try {
-        const data = fs.readFileSync(`${homedir}/.gists-cli.json`);
-        return JSON.parse(data.toString()).token
-    } catch (err) {
-        this.error(err);
+      const data = fs.readFileSync(`${homedir}/.gists-cli.json`)
+      return JSON.parse(data.toString()).token
+    } catch (error) {
+      this.error(error)
     }
   }
-  
-  getListOptions (gists, search) {
-    return gists.filter(gist => this.gistIncludes(gist, search)).map(gist => 
+
+  getListOptions(gists, search) {
+    return gists.filter(gist => this.gistIncludes(gist, search)).map(gist =>
       ({name: gist.description, value: gist.id})
-    )  
-  } 
+    )
+  }
 
   gistIncludes(gist, search) {
     const files = Object.keys(gist.files)
@@ -147,7 +147,7 @@ class FindCommand extends Command {
 {bgWhite.red.bold Description: }{bgWhite.black.bold ${gist.description} }
 {bgWhite.red.bold Files:                            }
     ${filesList}`
-    )    
+    )
   }
 }
 
@@ -163,7 +163,7 @@ When --action=edit you will be prompted to choose the file do edit (if more then
 FindCommand.flags = {
   action: flags.string(
     {
-      char: 'a', 
+      char: 'a',
       description: 'Action to take for the selected gist.',
       options: ['print', 'edit'],
     }
