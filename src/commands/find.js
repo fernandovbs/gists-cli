@@ -19,16 +19,15 @@ class FindCommand extends Command {
     const {args, flags} = this.parse(FindCommand)
 
     try {
-      cli.action.start('Searching gists...')
-
       const gistsClient = new Gists({token: this.getToken()})
+      const {search = ''} = args
+      const {action = 'print'} = flags
+
+      cli.action.start(`Searching for ${search}...`)
 
       const {pages} = await gistsClient.all()
       const [gistsResponseBody] = pages
       const {body: gists} = gistsResponseBody
-
-      const {search = ''} = args
-      const {action = 'print'} = flags
 
       const options = this.getListOptions(gists, search)
 
@@ -107,8 +106,6 @@ class FindCommand extends Command {
       } else {
         this.printGist(gist)
       }
-
-      this.exit()
     } catch (error) {
       this.error(error)
     }

@@ -15,7 +15,8 @@
     "chalk": "^4.1.0",
     "cli-ux": "^5.4.9",
     "gists": "^2.0.0",
-    "inquirer": "^7.3.3"
+    "inquirer": "^7.3.3",
+    "nock": "^13.0.4"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.22.2",
